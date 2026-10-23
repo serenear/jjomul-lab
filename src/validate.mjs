@@ -1,7 +1,11 @@
-import { loadCards } from './cards.mjs';
+import { loadContent } from './content/load.mjs';
+import { STATUS_LABEL } from './content/schema.mjs';
 
-const { cards, errors, warnings } = loadCards();
+const { content, errors, warnings } = loadContent();
 warnings.forEach((w) => console.warn(`⚠️  ${w}`));
 errors.forEach((e) => console.error(`❌ ${e}`));
-console.log(`카드 ${cards.length}장 확인 — 오류 ${errors.length}, 주의 ${warnings.length}`);
+const byStatus = Object.keys(STATUS_LABEL)
+  .map((s) => `${STATUS_LABEL[s]} ${content.cards.filter((c) => c.status === s).length}`)
+  .join(' · ');
+console.log(`콘텐츠 ${content.cards.length}개 (${byStatus}) — 오류 ${errors.length}, 주의 ${warnings.length}`);
 process.exit(errors.length ? 1 : 0);

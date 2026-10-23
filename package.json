@@ -1,16 +1,14 @@
 {
   "name": "jjomul-lab",
   "version": "1.0.0",
-  "description": "12~40개월 소근육 놀이 PDF 카드 제작·배포",
+  "description": "12~40개월 소근육 놀이 카드 제작·열람 서비스",
   "scripts": {
     "validate": "node src/validate.mjs",
-    "build": "node src/build.mjs",
-    "build:a5": "node src/build.mjs --size A5",
+    "check": "node src/check.mjs",
+    "preview": "node src/check.mjs --png",
+    "dev": "node src/server.mjs",
     "test": "node --test \"test/*.test.mjs\"",
-    "viewer": "node src/viewer/server.mjs",
-    "code:issue": "node src/viewer/cli.mjs issue",
-    "code:list": "node src/viewer/cli.mjs list",
-    "code:revoke": "node src/viewer/cli.mjs revoke"
+    "collect": "node src/collect/run.mjs"
   },
   "repository": {
     "type": "git",
@@ -26,7 +24,6 @@
   "dependencies": {
     "@fontsource/gowun-dodum": "^5.3.0",
     "@fontsource/noto-sans-kr": "^5.3.1",
-    "pdf-lib": "^1.17.1",
     "playwright-core": "^1.64.1",
     "yaml": "^2.9.1"
   },

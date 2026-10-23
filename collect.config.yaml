@@ -1,0 +1,20 @@
+# 아이놀이 수집기 설정 — npm run collect (또는 어드민 > 수집함 > 지금 수집하기)
+# 결과는 어드민 "수집함"에 제목 + 개요 + 원본 링크로 쌓여요. 같은 링크는 한 번만 들어와요.
+
+# 유튜브: '@핸들', 채널 주소, 'UC…' 채널 ID 중 아무거나
+# (YOUTUBE_API_KEY 환경변수가 있으면 공식 API, 없으면 채널 RSS를 써요)
+youtube_channels: []
+#  - "@채널핸들"
+#  - https://www.youtube.com/channel/UCxxxxxxxxxxxxxxxxxxxxxx
+
+# 인스타그램 해시태그 (# 없이). Instagram Graph API 연결이 필요해요:
+# IG_USER_ID, IG_ACCESS_TOKEN 환경변수 — 7일에 해시태그 30개까지 조회 가능
+instagram_hashtags:
+  - 아이랑
+  - 몬테소리
+  - 가정보육
+  - 놀이치료
+  - 미술치료
+
+# 출처마다 최근 몇 개까지 가져올지
+max_per_source: 15
