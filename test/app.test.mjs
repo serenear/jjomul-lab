@@ -101,6 +101,12 @@ test('콘텐츠 페이지: 가이드·A4 1장·워터마크·인쇄 버튼·평�
     assert.ok(html.includes(s), s);
   }
   assert.equal(r.headers.get('cache-control'), 'no-store');
+  // 화면엔 완성 모습, 인쇄엔 빈 도안: 두 장이 함께 있고 인쇄용 규칙이 붙어 있어요
+  assert.match(html, /class="layer done"/);
+  assert.match(html, /class="layer blank"/);
+  assert.match(html, /data-show="done"/);
+  assert.match(html, /인쇄될 도안/);
+  assert.match(html, /@media print \{\s*\.sheet \.art \.layer\.done \{ display: none !important; \}/);
   assert.equal((await b.call('/c/c024')).status, 403); // 아직 안 열림
   assert.equal((await b.call('/c/c001')).status, 403); // 셋에 없음
 });
@@ -236,6 +242,8 @@ test('어드민: 비밀번호 없으면 막고, 서랍·구독자·셋·소식�
   assert.match(await (await b.call('/admin/contents/c023')).text(), /\/admin\/sheet\/c023\/12-24/);
   const sheet = await b.call('/admin/sheet/c023/24-40');
   assert.equal(sheet.headers.get('x-frame-options'), 'SAMEORIGIN');
+  assert.doesNotMatch(await sheet.text(), /<polygon/, '인쇄본엔 완성 조각이 없어요');
+  assert.match(await (await b.call('/admin/sheet/c023/24-40?art=done')).text(), /<polygon/);
   for (const p of ['/admin/subscribers', '/admin/sets', '/admin/inbox']) assert.equal((await b.call(p)).status, 200, p);
   // 유효성 검사
   const bad = await b.call('/admin/subscribers', { method: 'POST', form: { nickname: '', childBirth: '2024-03', type: 'trial', startDate: '2026-10-23', days: '7' } });

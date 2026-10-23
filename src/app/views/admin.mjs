@@ -23,8 +23,8 @@ tr:last-child td{border-bottom:0}
 .st-idea{background:#eee;color:#555}.st-draft{background:#e4eff9;color:#2f5f8c}.st-review{background:#fdf1d8;color:#8a5a00}.st-published{background:#e3f3ec;color:#2f6b52}
 .code{font:700 30px/1.2 monospace;letter-spacing:.15em;background:#fff4dc;border-radius:12px;padding:14px;text-align:center}
 pre.msgbox{white-space:pre-wrap;background:#fff;border:1px dashed var(--line);border-radius:12px;padding:12px;font:14px var(--font-body);-webkit-user-select:all;user-select:all}
-.pv{width:360px;max-width:100%;height:509px;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:#fff}
-iframe.sheet{width:794px;height:1123px;border:0;transform:scale(.4534);transform-origin:0 0}
+.pv{width:240px;height:340px;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:#fff}
+iframe.sheet{width:794px;height:1123px;border:0;transform:scale(.3023);transform-origin:0 0}
 .photos{display:flex;gap:8px;flex-wrap:wrap}.photos img{width:120px;height:120px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
 .warn{color:#a3392f;font-weight:700}
 .idea{padding:10px 0;border-top:1px solid var(--line)}.idea:first-of-type{border-top:0}
@@ -168,7 +168,10 @@ ${
     : `<div class="grid g2" style="margin-top:14px">${BANDS.map((b) =>
         card.versions?.[b]
           ? `<div class="card"><h2 style="margin-top:0">${BAND_LABEL[b]} <span class="tag">${esc(card.versions[b].print)}</span></h2>
-<div class="pv"><iframe class="sheet" src="/admin/sheet/${card.id}/${b}" title="인쇄 미리보기"></iframe></div><div style="margin-top:12px">${guideHtml(card, b)}</div></div>`
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+<div><p class="small muted" style="margin:0 0 4px">인쇄본</p><div class="pv"><iframe class="sheet" src="/admin/sheet/${card.id}/${b}" title="인쇄 미리보기"></iframe></div></div>
+${card.versions[b].art_done ? `<div><p class="small muted" style="margin:0 0 4px">완성 모습 (화면 전용)</p><div class="pv"><iframe class="sheet" src="/admin/sheet/${card.id}/${b}?art=done" title="완성 모습"></iframe></div></div>` : ''}
+</div><div style="margin-top:12px">${guideHtml(card, b)}</div></div>`
           : `<div class="card"><h2 style="margin-top:0">${BAND_LABEL[b]}</h2><p class="warn">아직 이 구간 버전이 없어요</p></div>`,
       ).join('')}</div>`
 }`,

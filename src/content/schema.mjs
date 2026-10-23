@@ -38,6 +38,12 @@ function validateVersion(v, band, { hasArt }) {
     if (!isStr(v.art)) errors.push(`${p}.art: print가 "${v.print}"이면 도안 파일이 필요해요`);
     else if (hasArt && !hasArt(v.art)) errors.push(`${p}.art: ${v.art} 파일이 없어요`);
   }
+  // 완성 모습: 화면에서만 보이고 인쇄에는 빈 도안(art)만 나와요
+  if (v.art_done !== undefined) {
+    if (v.print === 'guide') errors.push(`${p}.art_done: print가 "guide"이면 도안이 없어 완성 모습을 쓸 수 없어요`);
+    else if (!isStr(v.art_done)) errors.push(`${p}.art_done: 파일명 문자열`);
+    else if (hasArt && !hasArt(v.art_done)) errors.push(`${p}.art_done: ${v.art_done} 파일이 없어요`);
+  }
   if (!isStrList(v.materials)) errors.push(`${p}.materials: 1개 이상`);
   if (!isStrList(v.steps) || v.steps.length > 3) errors.push(`${p}.steps: 1~3단계`);
   if (!isStrList(v.talk_examples) || v.talk_examples.length > 4) errors.push(`${p}.talk_examples: 1~4개`);

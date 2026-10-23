@@ -42,6 +42,7 @@ test('도안을 인쇄하는 버전은 도안 파일이 있어야 해요', () =>
   assert.ok(check(c).errors.some((e) => e.includes('none.svg')));
   c.versions['24-40'].print = 'guide';
   delete c.versions['24-40'].art;
+  delete c.versions['24-40'].art_done;
   assert.deepEqual(check(c).errors, []);
 });
 
@@ -58,4 +59,14 @@ test('셋: 없는 콘텐츠·잘못된 요일은 오류, 배치 차이는 경고
   assert.ok(r.errors.some((e) => e.includes('c999')));
   assert.ok(r.warnings.some((w) => w.includes('기본 배치')));
   assert.deepEqual(flattenSet({ weeks: [{ 화: 'c023', 월: 'c001' }] }).map((x) => x.day), ['월', '화']);
+});
+
+test('완성 모습(art_done): 파일 확인, 가이드만 인쇄하는 버전엔 쓸 수 없어요', () => {
+  const c = sample();
+  assert.deepEqual(check(c).errors, []);
+  c.versions['24-40'].art_done = 'none.svg';
+  assert.ok(check(c).errors.some((e) => e.includes('art_done') && e.includes('none.svg')));
+  c.versions['24-40'].art_done = 'tear-autumn-tree-done.svg';
+  c.versions['24-40'].print = 'guide';
+  assert.ok(check(c).errors.some((e) => e.includes('art_done')));
 });

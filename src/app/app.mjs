@@ -257,7 +257,8 @@ export async function createApp({
     if ((m = /^\/admin\/sheet\/(c\d{3})\/(12-24|24-40)$/.exec(path))) {
       const card = cardsById.get(m[1]);
       if (!card?.versions?.[m[2]]) return text('버전이 없어요', 404);
-      return respond(sheetDocument([{ card, band: m[2] }], content, { fontsBase: '/fonts' }), { frame: true });
+      const artMode = url.searchParams.get('art') === 'done' ? 'done' : 'blank';
+      return respond(sheetDocument([{ card, band: m[2] }], content, { fontsBase: '/fonts', artMode }), { frame: true });
     }
 
     const subscriberRows = async () =>

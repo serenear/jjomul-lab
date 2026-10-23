@@ -17,18 +17,27 @@ function chips(card, band) {
 const foot = (card, band, stamp) =>
   `<div class="foot"><span class="note">${NOTE}</span><span>${esc(BRAND.name)} · ${esc(card.id)}-${band}${stamp ? ` · ${esc(stamp)}` : ''}</span></div>`;
 
-/** stamp: 인쇄물에 남는 작은 발급 표시 (예: "ID S-0001") */
-export function sheetHtml(card, band, art, { stamp = '' } = {}) {
+function artBox(v, art, artMode) {
+  if (!v.art_done || artMode === 'blank') return `<div class="art">${art[v.art]}</div>`;
+  if (artMode === 'done') return `<div class="art">${art[v.art_done]}</div>`;
+  return `<div class="art"><div class="layer done">${art[v.art_done]}</div><div class="layer blank">${art[v.art]}</div></div>`;
+}
+
+/**
+ * stamp: 인쇄물에 남는 작은 발급 표시 (예: "ID S-0001")
+ * artMode: 'blank' 빈 도안 · 'done' 완성 모습 · 'both' 두 장을 겹쳐 두고 화면/인쇄에서 골라 보여요 (뷰어용)
+ */
+export function sheetHtml(card, band, art, { stamp = '', artMode = 'blank' } = {}) {
   const v = card.versions[band];
   const head = `<section class="sheet${v.print === 'art+guide' ? ' combo' : ''}" data-cat="${esc(card.category)}">${chips(card, band)}`;
 
   if (v.print === 'art') {
-    return `${head}<div class="art">${art[v.art]}</div>
+    return `${head}${artBox(v, art, artMode)}
 <div class="caption"><h1>${esc(card.title)}</h1>${v.front_caption ? `<p>${esc(v.front_caption)}</p>` : ''}</div>
 ${stamp ? `<div class="foot"><span></span><span>${esc(stamp)}</span></div>` : ''}</section>`;
   }
   if (v.print === 'art+guide') {
-    return `${head}<h1>${esc(card.title)}</h1><div class="art">${art[v.art]}</div>
+    return `${head}<h1>${esc(card.title)}</h1>${artBox(v, art, artMode)}
 <div class="mini">
   <div><div class="box"><h2>준비물</h2><ul class="dots">${li(v.materials)}</ul></div>
        <div class="plain"><h2>놀이 순서 · 약 ${v.duration_min}분</h2>${steps(v.steps)}</div></div>
@@ -56,8 +65,8 @@ ${content.css.card}`;
 }
 
 /** 시트만 있는 문서 (PDF 빌드·어드민 미리보기용) */
-export function sheetDocument(items, content, { size = 'A4', fontsBase, stamp } = {}) {
+export function sheetDocument(items, content, { size = 'A4', fontsBase, stamp, artMode } = {}) {
   return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>${esc(BRAND.name)}</title>
 ${fontLinks(fontsBase)}<style>${sheetCss(content, size)} body{margin:0;background:#fff}</style></head>
-<body>${items.map(({ card, band }) => sheetHtml(card, band, content.art, { stamp })).join('\n')}</body></html>`;
+<body>${items.map(({ card, band }) => sheetHtml(card, band, content.art, { stamp, artMode })).join('\n')}</body></html>`;
 }

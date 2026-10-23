@@ -87,6 +87,7 @@ ${past.length ? `<section class="card"><h2>지난 놀이</h2>${past.map(row).joi
 export function contentPage({ nonce, tokens, content, item, band, sub, rating }) {
   const { card } = item;
   const stamp = `ID ${sub.id}`;
+  const hasDone = !!card.versions[band].art_done;
   const wm = `<svg xmlns='http://www.w3.org/2000/svg' width='280' height='190'><text x='20' y='110' transform='rotate(-24 140 95)' font-family='sans-serif' font-size='15' fill='#000' fill-opacity='0.11'>${esc(stamp)} · ${esc(BRAND.name)}</text></svg>`;
   const chosen = new Set(rating?.reasons ?? []);
   const reasonChips = REASONS.map(
@@ -130,11 +131,12 @@ section{margin-top:16px}section h2{font-size:20px;margin:0 0 10px}
   <p class="muted small" style="margin:0">${item.index}번째 놀이 · ${esc(item.dateLabel)}</p>
   <h1 class="title">${esc(card.title)}</h1>
   <section>${guideHtml(card, band)}</section>
-  <section><h2>인쇄할 종이 (A4 1장)</h2></section>
+  <section><h2>${hasDone ? '완성 모습 · 인쇄할 종이' : '인쇄할 종이 (A4 1장)'}</h2>
+  ${hasDone ? `<div class="chips" style="margin:0 0 10px" id="show"><button type="button" class="chip on" data-v="done">완성 모습</button><button type="button" class="chip" data-v="blank">인쇄될 도안</button></div>` : ''}</section>
 </div>
-<div id="pv"><div class="zoom">${sheetHtml(card, band, content.art, { stamp })}</div></div>
+<div id="pv" data-show="done"><div class="zoom">${sheetHtml(card, band, content.art, { stamp, artMode: 'both' })}</div></div>
 <div class="screen">
-  <p class="tip">인쇄창에서 용지 <b>A4</b> · 배율 <b>100%</b>(또는 "실제 크기")를 골라 주세요.</p>
+  <p class="tip">${hasDone ? '인쇄하면 아이가 직접 꾸밀 <b>빈 도안</b>만 나와요. ' : ''}인쇄창에서 용지 <b>A4</b> · 배율 <b>100%</b>(또는 "실제 크기")를 골라 주세요.</p>
 
   <section class="card" id="rate">
     <h2>이 놀이, 또 만나고 싶나요?</h2>
@@ -173,6 +175,9 @@ section{margin-top:16px}section h2{font-size:20px;margin:0 0 10px}
     script: `(function(){
 var id=${JSON.stringify(card.id)};
 var pv=document.getElementById('pv'),z=pv.querySelector('.zoom');
+var sw=document.getElementById('show');
+if(sw)sw.querySelectorAll('.chip').forEach(function(b){b.addEventListener('click',function(){
+  pv.dataset.show=b.dataset.v;sw.querySelectorAll('.chip').forEach(function(x){x.classList.toggle('on',x===b)})})});
 function fit(){z.style.zoom=1;var w=z.querySelector('.sheet').offsetWidth;z.style.zoom=Math.min(1,pv.clientWidth/w);pv.style.height=(z.querySelector('.sheet').offsetHeight*parseFloat(z.style.zoom))+'px'}
 fit();addEventListener('resize',fit);
 addEventListener('beforeprint',function(){z.style.zoom=1;pv.style.height='auto'});addEventListener('afterprint',fit);
@@ -187,10 +192,10 @@ btns.forEach(function(b){b.addEventListener('click',function(){
   if(b.dataset.s==='A'){why.classList.add('hide');post('/api/rate',{contentId:id,score:'A',reasons:[]}).then(function(){say(rMsg,'고마워요! 비슷한 놀이를 더 준비할게요.',true)}).catch(function(e){say(rMsg,e.message)})}
   else why.classList.remove('hide');
 })});
-document.querySelectorAll('.chip').forEach(function(c){c.addEventListener('click',function(){c.classList.toggle('on');
+document.querySelectorAll('#why .chip').forEach(function(c){c.addEventListener('click',function(){c.classList.toggle('on');
   if(c.dataset.r==='의견 보내기')document.getElementById('whyText').classList.toggle('hide',!c.classList.contains('on'))})});
 document.getElementById('dSend').addEventListener('click',function(){
-  var reasons=[].map.call(document.querySelectorAll('.chip.on'),function(c){return c.dataset.r});
+  var reasons=[].map.call(document.querySelectorAll('#why .chip.on'),function(c){return c.dataset.r});
   post('/api/rate',{contentId:id,score:'D',reasons:reasons,text:document.getElementById('dText').value}).then(function(){say(rMsg,'알려 주셔서 고마워요. 다음 놀이에 꼭 반영할게요.',true)}).catch(function(e){say(rMsg,e.message)})});
 document.getElementById('fbSend').addEventListener('click',function(){var t=document.getElementById('fb'),m=document.getElementById('fbMsg');
   post('/api/feedback',{contentId:id,text:t.value}).then(function(){t.value='';say(m,'잘 받았어요. 고마워요!',true)}).catch(function(e){say(m,e.message)})});

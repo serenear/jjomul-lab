@@ -15,6 +15,7 @@ versions:
     duration_min: 10
     print: art
     art: tear-autumn-tree.svg
+    art_done: tear-autumn-tree-done.svg  # 화면에서만 보이는 완성 모습
     front_caption: 찌익~ 찢고, 꾹꾹 눌러서 나뭇잎을 붙여요
     materials:
       - 갈색·주황·노란 색종이 (손바닥보다 크게)
@@ -35,6 +36,7 @@ versions:
     duration_min: 15
     print: art
     art: tear-autumn-tree.svg
+    art_done: tear-autumn-tree-done.svg  # 화면에서만 보이는 완성 모습
     front_caption: 찌익~ 찢고, 쏙쏙 붙여서 나뭇잎을 만들어요
     materials:
       - 갈색·주황·노란 색종이

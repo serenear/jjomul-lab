@@ -25,6 +25,15 @@
   padding: 1.6rem; display: flex; align-items: center; justify-content: center;
 }
 .sheet .art svg { width: 100%; height: 100%; }
+/* 완성 모습 / 빈 도안 두 장을 겹쳐 둔 경우: 화면은 완성 모습, 인쇄는 언제나 빈 도안 */
+.sheet .art .layer { flex: 1; align-self: stretch; min-width: 0; display: flex; align-items: center; justify-content: center; }
+.sheet .art .layer.blank { display: none; }
+[data-show='blank'] .sheet .art .layer.blank { display: flex; }
+[data-show='blank'] .sheet .art .layer.done { display: none; }
+@media print {
+  .sheet .art .layer.done { display: none !important; }
+  .sheet .art .layer.blank { display: flex !important; }
+}
 .sheet .caption { text-align: center; }
 .sheet .caption p { margin-top: .4rem; font-size: var(--fs-body); color: var(--ink-soft); }
 

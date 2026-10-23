@@ -1,6 +1,7 @@
 // 인쇄 검사: 모든 콘텐츠 × 연령 버전이 A4 1장 안에 들어가는지 브라우저로 확인해요.
 // 고객에게는 HTML로만 제공하므로 PDF 파일은 만들지 않아요.
-// 사용법: node src/check.mjs [--only c023] [--png]   (--png: output/previews/<id>-<구간>.png 미리보기)
+// 사용법: node src/check.mjs [--only c023] [--png]
+//   --png: output/previews/<id>-<구간>.png (인쇄본) · <id>-<구간>-done.png (완성 모습, 인스타 소재)
 import { mkdirSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
@@ -59,7 +60,14 @@ for (const { card, band } of items) {
     failed += 1;
     console.error(`❌ ${key} ${card.title}: A4 1장을 넘쳐요. 문장을 줄이거나 print 레이아웃을 바꿔 주세요`);
   } else console.log(`✓ ${key} ${card.title}`);
-  if (png) await page.locator('.sheet').screenshot({ path: join(outDir, `${key}.png`) });
+  if (png) {
+    await page.locator('.sheet').screenshot({ path: join(outDir, `${key}.png`) });
+    if (card.versions[band].art_done) {
+      await page.setContent(sheetDocument([{ card, band }], content, { fontsBase, artMode: 'done' }), { waitUntil: 'load' });
+      await page.evaluate(() => document.fonts.ready);
+      await page.locator('.sheet').screenshot({ path: join(outDir, `${key}-done.png`) });
+    }
+  }
 }
 await browser.close();
 console.log(`\n${items.length}장 검사 — 넘침 ${failed}${png ? ' · 미리보기 → output/previews/' : ''}`);
