@@ -6,7 +6,11 @@
     "validate": "node src/validate.mjs",
     "build": "node src/build.mjs",
     "build:a5": "node src/build.mjs --size A5",
-    "test": "node --test \"test/*.test.mjs\""
+    "test": "node --test \"test/*.test.mjs\"",
+    "viewer": "node src/viewer/server.mjs",
+    "code:issue": "node src/viewer/cli.mjs issue",
+    "code:list": "node src/viewer/cli.mjs list",
+    "code:revoke": "node src/viewer/cli.mjs revoke"
   },
   "repository": {
     "type": "git",

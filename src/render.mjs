@@ -67,15 +67,15 @@ export function backPage(card) {
 
 /**
  * 완성된 HTML 문서. fontsBase는 node_modules/@fontsource 를 가리키는 URL 접두어예요.
- * extraHead/extraBody는 뷰어가 워터마크·보호 스크립트를 끼워 넣을 때 써요.
+ * extraHead/extraBody/wrap은 뷰어가 워터마크·보호 스크립트·확대 래퍼를 끼워 넣을 때 써요.
  */
-export function documentHtml(cards, artOf, { size = 'A4', fontsBase, extraHead = '', extraBody = '' }) {
+export function documentHtml(cards, artOf, { size = 'A4', fontsBase, extraHead = '', extraBody = '', wrap = (h) => h }) {
   const s = SIZES[size];
   const css = `${read('design', 'tokens.css')}\n${read('design', 'card.css')}`;
   const fonts = ['gowun-dodum/400.css', 'noto-sans-kr/400.css', 'noto-sans-kr/700.css']
     .map((f) => `<link rel="stylesheet" href="${fontsBase}/${f}">`)
     .join('\n');
-  const pages = cards.map((c) => frontPage(c, artOf(c)) + backPage(c)).join('\n');
+  const pages = wrap(cards.map((c) => frontPage(c, artOf(c)) + backPage(c)).join('\n'));
   return `<!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(BRAND.name)}</title>
