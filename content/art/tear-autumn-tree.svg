@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 760" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- 나뭇잎 붙이는 영역 (점선) -->
+  <path d="M110 330 A70 70 0 0 1 150 210 A80 80 0 0 1 270 130 A80 80 0 0 1 400 140 A75 75 0 0 1 480 230 A70 70 0 0 1 495 330 Q300 410 110 330 Z"
+        fill="#FFF6E3" stroke="#E9A23B" stroke-width="6" stroke-dasharray="4 16"/>
+
+  <!-- 땅 -->
+  <path d="M20 700 Q90 680 160 700 T300 700 T440 700 T580 700" stroke="#4A3B34" stroke-width="7"/>
+
+  <!-- 나무 기둥 + 가지 : 바깥 선 -->
+  <g stroke="#4A3B34" stroke-width="8">
+    <path d="M300 700 L300 470" stroke-width="86"/>
+    <path d="M290 500 C250 450 200 410 165 350" stroke-width="54"/>
+    <path d="M310 480 C350 440 400 400 440 340" stroke-width="54"/>
+    <path d="M300 480 L300 300" stroke-width="46"/>
+  </g>
+  <!-- 안쪽 색 -->
+  <g stroke="#FFFFFF">
+    <path d="M300 700 L300 470" stroke-width="72"/>
+    <path d="M290 500 C250 450 200 410 165 350" stroke-width="40"/>
+    <path d="M310 480 C350 440 400 400 440 340" stroke-width="40"/>
+    <path d="M300 480 L300 300" stroke-width="32"/>
+  </g>
+  <!-- 떨어진 잎 (색칠해 봐요) -->
+  <g stroke="#4A3B34" stroke-width="5">
+    <g transform="translate(90 735) rotate(-20)">
+      <path d="M0 -24 C18 -14 18 14 0 26 C-18 14 -18 -14 0 -24 Z"/><path d="M0 -20 L0 22"/>
+    </g>
+    <g transform="translate(205 742) rotate(15)">
+      <path d="M0 -24 C18 -14 18 14 0 26 C-18 14 -18 -14 0 -24 Z"/><path d="M0 -20 L0 22"/>
+    </g>
+    <g transform="translate(500 736) rotate(-35)">
+      <path d="M0 -24 C18 -14 18 14 0 26 C-18 14 -18 -14 0 -24 Z"/><path d="M0 -20 L0 22"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,36 @@
+/* 디자인 토큰 — 색·폰트·여백은 여기서만 바꿔요. 크기 단위는 rem (A4/A5 배율은 빌드에서 html font-size로 조절) */
+:root {
+  /* color */
+  --ink: #3b2f2a;
+  --ink-soft: #6b5b53;
+  --paper: #ffffff;
+  --line: #e7ddd3;
+
+  /* 요일별 포인트 (accent: 글자·선 / soft: 배경 / on-accent: accent 위 글자) */
+  --accent: #8a5a00;
+  --accent-soft: #fdf1d8;
+  --accent-bar: #e9a23b;
+
+  /* font */
+  --font-display: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+  --font-body: 'Noto Sans KR', sans-serif;
+
+  /* space / radius */
+  --pad: 4rem;
+  --gap: 2.2rem;
+  --radius: 1.6rem;
+  --radius-sm: 1rem;
+
+  /* type scale */
+  --fs-title: 3.4rem;
+  --fs-h2: 1.7rem;
+  --fs-body: 1.5rem;
+  --fs-small: 1.15rem;
+}
+
+/* 요일 테마 — 글자 대비 4.5:1 이상 유지 */
+[data-weekday='월'] { --accent: #a3392f; --accent-soft: #fde8e5; --accent-bar: #e8837a; }
+[data-weekday='화'] { --accent: #8a5a00; --accent-soft: #fdf1d8; --accent-bar: #e9a23b; }
+[data-weekday='수'] { --accent: #2f6b52; --accent-soft: #e3f3ec; --accent-bar: #6baf92; }
+[data-weekday='목'] { --accent: #2f5f8c; --accent-soft: #e4eff9; --accent-bar: #6b9ac4; }
+[data-weekday='금'] { --accent: #6b3f87; --accent-soft: #f1e8f7; --accent-bar: #b48bc9; }
