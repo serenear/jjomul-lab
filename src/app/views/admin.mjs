@@ -234,7 +234,7 @@ export function codeIssuedPage({ nonce, tokens, sub, code, message }) {
 export function subscriberDetailPage({ nonce, tokens, sub, info, sets, timeline, feedback, photos, byCategory }) {
   const tl = timeline
     .map(
-      (x) => `<tr><td>${x.week}주차 ${esc(x.day)}</td><td>${esc(x.ymd)}</td><td><a href="/admin/contents/${x.id}">${x.id}</a> ${esc(x.title)}</td>
+      (x) => `<tr><td>${x.index}번째 <span class="muted small">(${x.week}주 ${esc(x.day)} 칸)</span></td><td>${esc(x.dateLabel)}</td><td><a href="/admin/contents/${x.id}">${x.id}</a> ${esc(x.title)}</td>
 <td>${x.open ? '열림' : '<span class="muted">예정</span>'}${x.missing ? ' <span class="warn">버전 없음</span>' : ''}</td>
 <td>${x.rating ? (x.rating.score === 'A' ? '또 하고 싶어요' : `안 맞았어요 <span class="muted small">${esc(x.rating.reasons.join(', '))}</span>`) : ''}</td></tr>`,
     )

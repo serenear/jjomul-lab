@@ -34,36 +34,51 @@ function expiryBanner(exp) {
     : `<div class="banner"><b>이용 기간이 ${when}.</b><br>연장을 원하시면 메시지로 알려 주세요.</div>`;
 }
 
-export function homePage({ nonce, tokens, sub, band, items, weeksOpen, exp, ratings, todayYmd }) {
+export function homePage({ nonce, tokens, sub, band, sch, items, exp, ratings }) {
   const rated = new Map(ratings.map((r) => [r.contentId, r]));
   const row = (x) => {
     const r = rated.get(x.card.id);
     const badge = r ? `<span class="tag" style="background:#e3f3ec;color:#2f6b52">${r.score === 'A' ? '또 하고 싶어요' : '평가함'}</span>` : '';
-    const today = x.ymd === todayYmd ? '<span class="tag" style="background:#8a5a00;color:#fff">오늘</span> ' : '';
     return `<a class="row" href="/c/${esc(x.card.id)}" data-cat="${esc(x.card.category)}">
-<span class="day">${esc(x.dateLabel)}</span><span class="t">${today}${esc(x.card.title)}<br><span class="tag">${esc(x.card.category)}</span> ${badge}</span><span class="go">›</span></a>`;
+<span class="day">${esc(x.dateLabel)}</span><span class="t">${esc(x.card.title)}<br><span class="tag">${esc(x.card.category)}</span> ${badge}</span><span class="go">›</span></a>`;
   };
 
-  const thisWeek = items.filter((x) => x.week === weeksOpen);
-  const pastUnrated = items.filter((x) => x.week < weeksOpen && !rated.has(x.card.id));
-  const materials = [...new Map(thisWeek.flatMap((x) => x.card.versions[band].materials.map((m) => [m, x.day]))).entries()];
-  const weeks = [...new Set(items.map((x) => x.week))].sort((a, b) => b - a);
+  const today = items.find((x) => x.ymd === sch.todayYmd);
+  const past = items.filter((x) => x.ymd < sch.todayYmd).reverse();
+  const unrated = past.filter((x) => !rated.has(x.card.id)).slice(0, 5);
+  // 오늘부터 이번 주(주말엔 다음 주)에 열릴 놀이의 재료 — 제목은 그날 열릴 때까지 숨겨요
+  const [ws, we] = sch.prepWeek;
+  const weekItems = sch.items.filter((x) => x.ready && x.ms >= ws && x.ms < we && x.ms < exp.endAt && x.ymd >= sch.todayYmd);
+  const materials = weekItems.flatMap((x) =>
+    x.card.versions[band].materials.map((m) => ({ m, label: x.ymd === sch.todayYmd ? '오늘' : `${x.dateLabel} 예정` })),
+  );
+  const prepTitle = sch.isWeekday ? '이번 주 준비물' : '다음 주 준비물';
+
+  const todayCard = today
+    ? `<a class="today" href="/c/${esc(today.card.id)}" data-cat="${esc(today.card.category)}">
+<span class="muted small">${esc(today.dateLabel)} · ${today.index}번째 놀이</span>
+<span class="big">${esc(today.card.title)}</span><span class="tag">${esc(today.card.category)}</span>
+<span class="btn" style="margin-top:12px">오늘 놀이 보기</span></a>`
+    : `<div class="card"><b>${sch.isWeekday ? '오늘은 쉬어 가요.' : '주말엔 쉬어요.'}</b><br><span class="muted">${past.length ? '지난 놀이를 한 번 더 해 봐도 좋아요.' : '평일 아침에 첫 놀이가 열려요.'}</span></div>`;
 
   return page({
     nonce,
     tokens,
     title: '내 놀이',
-    css: `${'.row{display:flex;gap:12px;align-items:center;padding:12px 4px;border-top:1px solid var(--line);text-decoration:none}.row:first-of-type{border-top:0}'}
-.row .day{flex:none;width:92px;font-size:13px;color:var(--ink-soft)}.row .t{flex:1}.row .go{font-size:22px;color:var(--ink-soft)}
-section{margin-top:18px}h2{font-size:20px;margin:0 0 8px}ul.mat{margin:0;padding-left:20px}`,
+    css: `.row{display:flex;gap:12px;align-items:center;padding:12px 4px;border-top:1px solid var(--line);text-decoration:none}.row:first-of-type{border-top:0}
+.row .day{flex:none;width:96px;font-size:13px;color:var(--ink-soft)}.row .t{flex:1}.row .go{font-size:22px;color:var(--ink-soft)}
+.today{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-decoration:none;background:#fff;border:2px solid var(--accent-bar);border-radius:18px;padding:18px}
+.today .big{font:400 24px/1.3 var(--font-display)}
+section{margin-top:16px}h2{font-size:20px;margin:0 0 8px}ul.mat{margin:0;padding-left:20px}`,
     body: `<main class="wrap">
 <p class="muted small" style="margin:0">${esc(BRAND.name)} · ${esc(BAND_LABEL[band])}</p>
 <h1 style="font-size:28px;margin:2px 0 14px">오늘도 손끝 놀이</h1>
 ${expiryBanner(exp)}
-${pastUnrated.length ? `<section class="card"><h2>지난주 놀이 어땠어요?</h2><p class="muted small" style="margin:0 0 6px">눌러서 알려 주시면 다음 놀이를 고르는 데 큰 도움이 돼요.</p>${pastUnrated.map(row).join('')}</section>` : ''}
-${materials.length ? `<section class="card"><h2>이번 주 준비물</h2><ul class="mat">${materials.map(([m, d]) => `<li>${esc(m)} <span class="muted small">(${esc(d)})</span></li>`).join('')}</ul></section>` : ''}
-${weeks.map((w) => `<section class="card"><h2>${w}주차${w === weeksOpen ? ' · 이번 주' : ''}</h2>${items.filter((x) => x.week === w).map(row).join('')}</section>`).join('') || '<section class="card">아직 열린 놀이가 없어요. 월요일에 새 놀이가 열려요.</section>'}
-<p class="muted small" style="text-align:center;margin-top:24px">매주 월요일에 한 주치 놀이가 열려요 · ${esc(sub.id)}</p>
+<h2>오늘의 놀이</h2>${todayCard}
+${unrated.length ? `<section class="card"><h2>지난 놀이 어땠어요?</h2><p class="muted small" style="margin:0 0 6px">눌러서 알려 주시면 다음 놀이를 고르는 데 큰 도움이 돼요.</p>${unrated.map(row).join('')}</section>` : ''}
+${materials.length ? `<section class="card"><h2>${prepTitle}</h2><p class="muted small" style="margin:0 0 6px">앞으로 열릴 놀이 재료예요. 미리 챙겨 두세요.</p><ul class="mat">${materials.map((x) => `<li>${esc(x.m)} <span class="muted small">(${esc(x.label)})</span></li>`).join('')}</ul></section>` : ''}
+${past.length ? `<section class="card"><h2>지난 놀이</h2>${past.map(row).join('')}</section>` : ''}
+<p class="muted small" style="text-align:center;margin-top:24px">평일마다 새 놀이가 하나씩 열려요 · ${esc(sub.id)}</p>
 </main>`,
   });
 }
@@ -112,7 +127,7 @@ section{margin-top:16px}section h2{font-size:20px;margin:0 0 10px}
 <div class="bar"><a href="/home">← 목록</a><span class="sp"></span><button class="btn" id="print" type="button">인쇄하기</button></div>
 <main class="wrap">
 <div class="screen">
-  <p class="muted small" style="margin:0">${esc(item.week)}주차 · ${esc(item.dateLabel)}</p>
+  <p class="muted small" style="margin:0">${item.index}번째 놀이 · ${esc(item.dateLabel)}</p>
   <h1 class="title">${esc(card.title)}</h1>
   <section>${guideHtml(card, band)}</section>
   <section><h2>인쇄할 종이 (A4 1장)</h2></section>

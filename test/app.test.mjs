@@ -105,15 +105,38 @@ test('콘텐츠 페이지: 가이드·A4 1장·워터마크·인쇄 버튼·평�
   assert.equal((await b.call('/c/c001')).status, 403); // 셋에 없음
 });
 
-test('월요일이 되면 다음 주가 열리고, 지난주 평가를 물어봐요', async () => {
-  const b = await boot();
+test('평일마다 하나씩 열리고, 주말엔 쉬고, 지난 놀이 평가를 물어봐요', async () => {
+  const b = await boot(); // 금요일 시작 → 금: c023, 월: c024
   const { code } = await b.addSubscriber();
   await b.login(code);
-  b.clock.t = at('2026-10-26T00:00:01+09:00');
-  const home = await (await b.call('/home')).text();
-  assert.match(home, /둘째 주 놀이/);
-  assert.match(home, /지난주 놀이 어땠어요\?/);
+  const fri = await (await b.call('/home')).text();
+  assert.match(fri, /오늘의 놀이/);
+  assert.match(fri, /1번째 놀이/);
+
+  b.clock.t = at('2026-10-24T10:00:00+09:00'); // 토
+  const sat = await (await b.call('/home')).text();
+  assert.match(sat, /주말엔 쉬어요/);
+  assert.match(sat, /다음 주 준비물/);
+  assert.match(sat, /10월 26일 \(월\) 예정/);
+  assert.doesNotMatch(sat, /둘째 주 놀이/, '월요일 놀이 제목은 아직 비밀');
+  assert.equal((await b.call('/c/c024')).status, 403);
+
+  b.clock.t = at('2026-10-26T00:00:01+09:00'); // 월 00시
+  const mon = await (await b.call('/home')).text();
+  assert.match(mon, /둘째 주 놀이/);
+  assert.match(mon, /2번째 놀이/);
+  assert.match(mon, /지난 놀이 어땠어요\?/);
   assert.equal((await b.call('/c/c024')).status, 200);
+});
+
+test('준비물은 이번 주에 열릴 놀이까지 미리 보여 주되 제목은 숨겨요', async () => {
+  const b = await boot({ t: at('2026-10-26T09:00:00+09:00') }); // 월요일 시작
+  const { code } = await b.addSubscriber({ startDate: '2026-10-26' });
+  await b.login(code);
+  const home = await (await b.call('/home')).text(); // 월 c023, 화 c024
+  assert.match(home, /이번 주 준비물/);
+  assert.match(home, /10월 27일 \(화\) 예정/);
+  assert.doesNotMatch(home, /둘째 주 놀이/, '내일 놀이 제목은 아직 비밀');
 });
 
 test('평점: A / D+이유, 다시 누르면 덮어쓰고 슬랙에 구독자·콘텐츠·일자·점수', async () => {

@@ -43,11 +43,16 @@ export function weekStart(ms) {
   const d = new Date(ms + KST);
   return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - ((d.getUTCDay() + 6) % 7)) - KST;
 }
-/** 시작일이 속한 주 = 1주차. 매주 월요일에 한 주씩 열려요. */
-export const unlockedWeeks = (startYmd, now) => {
-  const s = dateStart(startYmd);
-  return now < s ? 0 : Math.round((weekStart(now) - weekStart(s)) / (7 * DAY)) + 1;
+export const isWeekday = (ms) => {
+  const d = new Date(ms + KST).getUTCDay();
+  return d >= 1 && d <= 5;
 };
+/** 시작일부터 평일(월~금) 날짜를 count개 — 놀이가 하나씩 열리는 날 (각 00:00 KST) */
+export function weekdayDates(startYmd, count) {
+  const out = [];
+  for (let ms = dateStart(startYmd); out.length < count; ms += DAY) if (isWeekday(ms)) out.push(ms);
+  return out;
+}
 /** 아이 생년월 'YYYY-MM' → 오늘 기준 개월 수 */
 export function ageMonths(birthYm, now) {
   const [y, m] = birthYm.split('-').map(Number);

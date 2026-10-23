@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ageMonths, bandForMonths, dateStart, kstDate, normalizeCode, randomCode, unlockedWeeks, weekStart } from '../src/app/util.mjs';
+import { ageMonths, bandForMonths, dateStart, isWeekday, kstDate, normalizeCode, randomCode, weekStart, weekdayDates } from '../src/app/util.mjs';
 
 const at = (iso) => Date.parse(iso); // ISO 시각 (+09:00 로 KST 지정)
 
@@ -16,12 +16,13 @@ test('주 시작은 월요일 00:00 KST', () => {
   assert.equal(weekStart(at('2026-10-26T00:00:00+09:00')), at('2026-10-26T00:00:00+09:00'));
 });
 
-test('시작한 주가 1주차, 월요일마다 한 주씩 열려요', () => {
-  assert.equal(unlockedWeeks('2026-10-23', at('2026-10-22T12:00:00+09:00')), 0);
-  assert.equal(unlockedWeeks('2026-10-23', at('2026-10-23T12:00:00+09:00')), 1);
-  assert.equal(unlockedWeeks('2026-10-23', at('2026-10-25T23:59:00+09:00')), 1);
-  assert.equal(unlockedWeeks('2026-10-23', at('2026-10-26T00:00:00+09:00')), 2);
-  assert.equal(unlockedWeeks('2026-10-23', at('2026-11-09T09:00:00+09:00')), 4);
+test('시작일부터 평일마다 하나씩 (주말 건너뜀)', () => {
+  // 2026-10-23 금 → 금, 월, 화
+  assert.deepEqual(weekdayDates('2026-10-23', 3).map(kstDate), ['2026-10-23', '2026-10-26', '2026-10-27']);
+  // 토요일에 시작하면 월요일부터
+  assert.deepEqual(weekdayDates('2026-10-24', 1).map(kstDate), ['2026-10-26']);
+  assert.equal(isWeekday(at('2026-10-24T12:00:00+09:00')), false);
+  assert.equal(isWeekday(at('2026-10-26T00:00:00+09:00')), true);
 });
 
 test('개월 수와 연령 구간', () => {

@@ -1,10 +1,10 @@
 // 앱 본체: Request → Response. Node 서버와 Cloudflare Workers에서 똑같이 돌아가요.
-import { BANDS, WEEKDAYS, flattenSet } from '../content/schema.mjs';
+import { BANDS, flattenSet } from '../content/schema.mjs';
 import { BRAND } from '../render/html.mjs';
 import { sheetDocument } from '../render/sheet.mjs';
 import {
   DAY, ageMonths, bandForMonths, dateStart, hmacSigner, kstDate, kstLabel, normalizeCode,
-  randomCode, randomId, safeEqual, unlockedWeeks, weekStart,
+  isWeekday, randomCode, randomId, safeEqual, weekStart, weekdayDates,
 } from './util.mjs';
 import { REASONS, contentPage, homePage, loginPage } from './views/viewer.mjs';
 import {
@@ -96,21 +96,27 @@ export async function createApp({
     const months = ageMonths(s.childBirth, t);
     return { months, band: s.band && s.band !== 'auto' ? s.band : bandForMonths(months) };
   }
-  /** 구독자의 셋을 날짜·열림 여부와 함께 펼쳐요 */
+  /**
+   * 구독자의 셋을 펼쳐요. 셋의 순서대로, 시작일부터 평일마다 하나씩 00:00 KST에 열려요.
+   * 이용 기간이 끝난 뒤의 날짜는 열리지 않아요.
+   */
   function scheduleOf(s, content, t) {
     const set = content.sets.find((x) => x.id === s.setId) ?? content.sets.find((x) => x.id === 'default');
     const byId = new Map(content.cards.map((c) => [c.id, c]));
     const { band } = bandOf(s, t);
-    const weeksOpen = unlockedWeeks(s.startDate, t);
-    const mon = weekStart(dateStart(s.startDate));
+    const list = flattenSet(set);
+    const dates = weekdayDates(s.startDate, list.length);
     return {
       band,
-      weeksOpen,
-      items: flattenSet(set).map((x) => {
-        const ms = mon + ((x.week - 1) * 7 + WEEKDAYS.indexOf(x.day)) * DAY;
+      todayYmd: kstDate(t),
+      isWeekday: isWeekday(t),
+      // 준비물 안내 주간: 평일엔 이번 주, 주말엔 다음 주 (주말에 장보기 하도록)
+      prepWeek: isWeekday(t) ? [weekStart(t), weekStart(t) + 7 * DAY] : [weekStart(t) + 7 * DAY, weekStart(t) + 14 * DAY],
+      items: list.map((x, i) => {
+        const ms = dates[i];
         const card = byId.get(x.id);
         const ready = !!card && card.status === 'published' && !!card.versions?.[band];
-        return { ...x, card, ymd: kstDate(ms), dateLabel: `${x.day}요일`, open: x.week <= weeksOpen, ready };
+        return { ...x, index: i + 1, card, ms, ymd: kstDate(ms), dateLabel: kstLabel(ms), open: t >= ms && ms < endAt(s), ready };
       }),
     };
   }
@@ -143,7 +149,7 @@ export async function createApp({
       `열람 주소: ${baseUrl || '(서비스 주소)'}`,
       `비밀번호: ${code}`,
       `${s.type === 'trial' ? '체험' : '이용'} 기간: ${s.startDate} ~ ${s.endDate}`,
-      '매주 월요일에 한 주치 놀이가 열려요.',
+      '평일 아침마다 새 놀이가 하나씩 열려요.',
     ].join('\n');
 
   // ---------- 어드민 ----------
@@ -470,11 +476,10 @@ export async function createApp({
             tokens,
             sub,
             band: sch.band,
+            sch,
             items: visibleItems(sch),
-            weeksOpen: sch.weeksOpen,
             ratings,
-            todayYmd: kstDate(t),
-            exp: { daysLeft: daysLeftOf(sub, t), endLabel: kstLabel(dateStart(sub.endDate)), type: sub.type },
+            exp: { daysLeft: daysLeftOf(sub, t), endLabel: kstLabel(dateStart(sub.endDate)), endAt: endAt(sub), type: sub.type },
           }),
           { nonce },
         );
